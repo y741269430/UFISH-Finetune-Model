@@ -223,7 +223,7 @@ plt.show()
 #### 4.2 Prediction & Evaluation ####  
 ```
 # run prediction 
-CUDA_VISIBLE_DEVICES=0 nohup spotiflow-predict ../FISH_spots/UD2_datasets/test 、
+CUDA_VISIBLE_DEVICES=0 nohup spotiflow-predict ../FISH_spots/UD2_datasets/test \
 -md ./model_finetune -o ./predict_test -t 0.5 -d cuda &
 ```
 ```
