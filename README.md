@@ -347,6 +347,155 @@ file_count = count_files('/home/jjyang/jupyter_file/my_finetune/temp_cut/')
 print(f"文件数量：{file_count}")
 ```
 
+### 2.5 删除不配对的TIF和CSV      
+上述2.4裁剪了TIF以及CSV，然而TIF里面一些空白的地方，是没有CSV的结果的，所以在裁剪的时候会丢失这部分信息，即TIF与CSV不对齐了。于是我们把这些没有对齐的文件进行删除    
+```python
+base_directory = '/home/jjyang/jupyter_file/my_finetune/'
+folder_name = 'temp_cut'
+
+from pathlib import Path
+import os
+
+def get_base_filename(filename):
+    """从文件名中提取基础部分（去掉扩展名）"""
+    return filename.stem
+
+def filter_files_by_pairs(base_directory, folder_name):
+    """过滤指定文件夹中的文件，只保留同时具有 .tif 和 .csv 的文件对"""
+    # 构建完整路径
+    folder_path = Path(base_directory) / folder_name
+
+    if not folder_path.exists():
+        print(f"The directory {folder_path} does not exist.")
+        return
+
+    tif_files = {}
+    csv_files = {}
+
+    # 收集所有 .tif 和 .csv 文件
+    for item in folder_path.iterdir():
+        if item.is_file():
+            base_name = get_base_filename(item)
+            if base_name:
+                if item.suffix == '.tif':
+                    tif_files[base_name] = item
+                elif item.suffix == '.csv':
+                    csv_files[base_name] = item
+
+    # 找出同时存在 .tif 和 .csv 的文件对
+    paired_bases = set(tif_files.keys()) & set(csv_files.keys())
+
+    # 删除那些没有配对的文件
+    for base_name, file_path in list(tif_files.items()) + list(csv_files.items()):
+        if base_name not in paired_bases:
+            try:
+                os.remove(file_path)
+                print(f"Deleted unpaired file: {file_path}")
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+
+    # 打印保留的文件对
+    for base_name in paired_bases:
+        print(f"Kept paired files:")
+        print(f"  TIF: {tif_files[base_name]}")
+        print(f"  CSV: {csv_files[base_name]}")
+
+filter_files_by_pairs(base_directory, folder_name)
+```
+结果如下：    
+<img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p5.jpg" width="600" />  
+
+
+### 2.6    
+```python
+import os
+import random
+import shutil
+from collections import defaultdict
+import sys
+
+# 自定义的日志文件类，用于重定向 stdout
+class Logger:
+    def __init__(self, log_file):
+        self.terminal = sys.stdout
+        self.log = open(log_file, "w")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        pass
+
+# 设置日志文件路径
+log_path = '/home/jjyang/jupyter_file/finetune_model/dataset_split/output.log'
+os.makedirs(os.path.dirname(log_path), exist_ok=True)
+sys.stdout = Logger(log_path)
+
+# 下面是原有逻辑的函数和主流程
+def get_unique_sample_names(folder_path):
+    sample_files = defaultdict(list)
+    
+    for filename in os.listdir(folder_path):
+        if filename.lower().endswith(('.tif', '.tiff', '.jpg', '.jpeg', '.png', '.bmp', '.csv')):
+            name_part = filename.rsplit('.', 1)[0]
+            if "_cropped_" in name_part:
+                sample_name = name_part.split("_cropped_")[0]
+                sample_files[sample_name].append(filename)
+    
+    return sample_files
+
+def split_samples(sample_dict, test_ratio=0.2, train_ratio=0.6, val_ratio=0.2):
+    assert test_ratio + train_ratio + val_ratio == 1.0, "比例总和必须为1"
+
+    samples = list(sample_dict.keys())
+    random.shuffle(samples)
+
+    total = len(samples)
+    test_end = int(total * test_ratio)
+    train_end = test_end + int(total * train_ratio)
+
+    test_samples = samples[:test_end]
+    train_samples = samples[test_end:train_end]
+    val_samples = samples[train_end:]
+
+    return {
+        'test': test_samples,
+        'train': train_samples,
+        'val': val_samples
+    }
+
+def copy_samples_to_folders(sample_dict, folder_path, split_result, target_base_dir):
+    # 创建目标文件夹
+    for folder in ['mytest', 'mytrain', 'myval']:
+        os.makedirs(os.path.join(target_base_dir, folder), exist_ok=True)
+
+    # 复制文件
+    for folder, sample_list in split_result.items():
+        for sample_name in sample_list:
+            for filename in sample_dict[sample_name]:
+                src = os.path.join(folder_path, filename)
+                dst = os.path.join(target_base_dir, folder, filename)
+                shutil.copy(src, dst)  # 如果是移动而不是复制，用 shutil.move
+                print(f"已复制 {filename} 到 {folder}")
+
+# 使用示例
+folder_path = '/home/jjyang/jupyter_file/my_finetune/temp_cut/'
+target_base_dir = '/home/jjyang/jupyter_file/finetune_model/'
+
+print("🔍 正在收集样本...")
+sample_dict = get_unique_sample_names(folder_path)
+
+print("🔄 正在划分样本...")
+split_result = split_samples(sample_dict)
+
+print("🚚 正在复制文件...")
+copy_samples_to_folders(sample_dict, folder_path, split_result, target_base_dir)
+
+print("✅ 完成！")
+```
+
+
 
 ## 3.UFISH Finetune ####
 ```
