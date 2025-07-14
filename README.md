@@ -22,6 +22,66 @@ conda activate ufish
 ## 1.数据集及模型概况 ####
 
 ## 2.数据集处理流程 ####
+### 2.1 
+举例说明我是如何把一个TIF，根据文件名，拆分通道的   
+```python
+#### 神经节 ####
+
+from PIL import Image
+import os
+
+# 定义路径
+input_dir = '/home/jjyang/jupyter_file/my_finetune/call点图像整理/神经节/2/bigwarp'  # 输入文件夹（包含多通道 TIF 文件）
+output_dir = '/home/jjyang/jupyter_file/my_finetune/call点图像整理/神经节/2/RS-FISH'  # 输出文件夹
+
+# 创建输出文件夹（如果不存在）
+os.makedirs(output_dir, exist_ok=True)
+
+# 遍历输入文件夹中的所有 TIF 文件
+for file_name in os.listdir(input_dir):
+    if not file_name.endswith('.tif'):
+        continue  # 跳过非 TIF 文件
+
+    tif_path = os.path.join(input_dir, file_name)  # 完整路径
+    print(f"正在处理文件：{tif_path}")
+
+    try:
+        # 打开多通道 TIF 文件
+        img = Image.open(tif_path)
+
+        # 解析 TIF 文件名，提取基因名称
+        base_name, _ = os.path.splitext(file_name)  # 去掉扩展名
+        parts = base_name.split('-')[-1].split(' ')  # 提取最后一个部分并分割基因名称
+        gene_names = [part for part in parts if part]  # 过滤空字符串
+
+        # 确保基因名称数量不超过通道数 - 1（因为第一个通道是 DAPI）
+        if len(gene_names) > img.n_frames - 1:
+            raise ValueError(f"基因名称数量超过通道数！TIF 文件 {file_name} 包含 {img.n_frames} 个通道，但找到 {len(gene_names)} 个基因名称。")
+
+        # 循环遍历所有帧/通道
+        for i in range(img.n_frames):
+            img.seek(i)  # 移动到指定帧
+            frame = img.copy()
+
+            # 确定新文件名
+            if i == 0:
+                new_file_name = "DAPI.tif"  # 第一个通道是 DAPI
+            elif i <= len(gene_names):
+                gene_name = gene_names[i - 1]  # 对应的基因名称
+                new_file_name = f"{gene_name}.tif"
+            else:
+                new_file_name = f"Unknown_Ch{i}.tif"  # 如果基因名称不足，则使用默认名称
+
+            # 保存图片
+            output_path = os.path.join(output_dir, new_file_name)
+            frame.save(output_path)
+            print(f"已保存：{output_path}")
+
+    except Exception as e:
+        print(f"处理文件 {tif_path} 时出错：{e}")
+```
+结果如下：    
+
 
 ## 3.UFISH Finetune ####
 ```
