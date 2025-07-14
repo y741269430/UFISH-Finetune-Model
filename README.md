@@ -406,7 +406,7 @@ filter_files_by_pairs(base_directory, folder_name)
 <img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p5.jpg" width="600" />  
 
 
-### 2.6    
+### 2.6 将数据集按2：6：2分配到不同文件夹中，并且使其来自于同一个TIF或CSV       
 ```python
 import os
 import random
