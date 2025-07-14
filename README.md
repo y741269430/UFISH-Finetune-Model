@@ -428,7 +428,7 @@ class Logger:
         pass
 
 # 设置日志文件路径
-log_path = '/home/jjyang/jupyter_file/finetune_model/dataset_split/output.log'
+log_path = '/home/jjyang/jupyter_file/my_finetune/dataset_output.log'
 os.makedirs(os.path.dirname(log_path), exist_ok=True)
 sys.stdout = Logger(log_path)
 
@@ -467,7 +467,7 @@ def split_samples(sample_dict, test_ratio=0.2, train_ratio=0.6, val_ratio=0.2):
 
 def copy_samples_to_folders(sample_dict, folder_path, split_result, target_base_dir):
     # 创建目标文件夹
-    for folder in ['mytest', 'mytrain', 'myval']:
+    for folder in ['test', 'train', 'val']:
         os.makedirs(os.path.join(target_base_dir, folder), exist_ok=True)
 
     # 复制文件
@@ -481,7 +481,7 @@ def copy_samples_to_folders(sample_dict, folder_path, split_result, target_base_
 
 # 使用示例
 folder_path = '/home/jjyang/jupyter_file/my_finetune/temp_cut/'
-target_base_dir = '/home/jjyang/jupyter_file/finetune_model/'
+target_base_dir = '/home/jjyang/jupyter_file/my_finetune/temp_ds/'  # 新建的根目录
 
 print("🔍 正在收集样本...")
 sample_dict = get_unique_sample_names(folder_path)
