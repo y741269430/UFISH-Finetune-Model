@@ -334,6 +334,19 @@ for image_file in image_files:
 
 logging.info("Batch cropping and CSV processing completed.")
 ```
+检查一下一共有多少张TIF及CSV
+```python
+import os
+
+def count_files(directory):
+    return len([item for item in os.listdir(directory) 
+               if os.path.isfile(os.path.join(directory, item))])
+
+# 示例
+file_count = count_files('/home/jjyang/jupyter_file/my_finetune/temp_cut/')
+print(f"文件数量：{file_count}")
+```
+
 
 ## 3.UFISH Finetune ####
 ```
