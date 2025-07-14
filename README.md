@@ -207,6 +207,134 @@ rename_and_reorder_csv_columns(directory_path)
 <img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p3.jpg" width="550" />    
 <img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p4.jpg" width="550" />   
 
+### 2.4 裁剪TIF以及CSV    
+举例说明如何把文件夹里面的TIF以及CSV，裁剪成指定大小（512*512）    
+```python
+import os
+import pandas as pd
+from skimage.io import imread, imsave
+import logging
+
+# 设置日志配置
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# 定义输入和输出目录
+image_input_dir = '/home/jjyang/jupyter_file/my_finetune/temp/'
+csv_input_dir = image_input_dir
+image_output_dir = '/home/jjyang/jupyter_file/my_finetune/temp_cut/'
+csv_output_dir = image_output_dir
+
+os.makedirs(image_output_dir, exist_ok=True)
+os.makedirs(csv_output_dir, exist_ok=True)
+
+# 定义裁剪尺寸
+crop_size = 512
+
+def process_image_and_csv(image_path, csv_path):
+    try:
+        # 读取原始图像
+        im0 = imread(image_path)
+    except Exception as e:
+        logging.error(f"Error reading image file {image_path}: {e}")
+        return
+
+    try:
+        # 读取原始CSV文件
+        df0 = pd.read_csv(csv_path, usecols=[0, 1])  # 假设CSV只有两列：Y和X
+    except Exception as e:
+        logging.error(f"Error reading CSV file {csv_path}: {e}")
+        return
+
+    # 检查并转换数据类型
+    def convert_to_numeric(df, column):
+        df.loc[:, column] = pd.to_numeric(df[column], errors='coerce')
+        return df.dropna(subset=[column])
+    
+    df0 = convert_to_numeric(convert_to_numeric(df0, df0.columns[0]), df0.columns[1])
+
+    total_points_before = len(df0)  # 记录原始点的数量
+    logging.info(f"Total points before cropping: {total_points_before}")
+
+    if total_points_before == 0:
+        logging.warning(f"No points found in the original CSV file {csv_path}. Skipping processing.")
+        return
+
+    # 获取图像文件名的基名（不包括扩展名）
+    base_name = os.path.splitext(os.path.basename(image_path))[0]
+
+    # 遍历图像进行裁剪
+    for start_y in range(0, im0.shape[0], crop_size):
+        for start_x in range(0, im0.shape[1], crop_size):
+            end_y = min(start_y + crop_size, im0.shape[0])
+            end_x = min(start_x + crop_size, im0.shape[1])
+
+            # 确保当前裁剪区域大小为512x512
+            if (end_y - start_y == crop_size) and (end_x - start_x == crop_size):
+                # 裁剪图像
+                cropped_im0 = im0[start_y:end_y, start_x:end_x]
+
+                # 构建输出文件名
+                image_filename = f"{base_name}_cropped_{start_y}_{start_x}.tif"
+                image_filepath = os.path.join(image_output_dir, image_filename)
+
+                # 保存裁剪后的图像
+                try:
+                    imsave(image_filepath, cropped_im0)
+                    logging.info(f"Cropped image saved to {image_filepath}")
+                except Exception as e:
+                    logging.error(f"Error saving cropped image to {image_filepath}: {e}")
+                    continue
+
+                # 过滤出位于当前裁剪区域内的点
+                cropped_df = df0[(df0[df0.columns[0]] >= start_y) & (df0[df0.columns[0]] < end_y) &
+                                 (df0[df0.columns[1]] >= start_x) & (df0[df0.columns[1]] < end_x)].copy()
+
+                total_points_after = len(cropped_df)
+                logging.info(f"Points before cropping: {total_points_before}, after cropping: {total_points_after}.")
+
+                # 如果裁剪后的DataFrame为空，则跳过保存
+                if cropped_df.empty:
+                    logging.warning("No points found in this cropped region. Skipping CSV save.")
+                    continue
+
+                # 调整坐标系
+                cropped_df.loc[:, df0.columns[0]] -= start_y
+                cropped_df.loc[:, df0.columns[1]] -= start_x
+
+                # 构建输出文件名
+                csv_filename = f"{base_name}_cropped_{start_y}_{start_x}.csv"
+                csv_filepath = os.path.join(csv_output_dir, csv_filename)
+
+                # 保存调整后的CSV文件
+                try:
+                    cropped_df.to_csv(csv_filepath, index=False)
+                    logging.info(f"Adjusted CSV saved to {csv_filepath}")
+                except Exception as e:
+                    logging.error(f"Error saving adjusted CSV to {csv_filepath}: {e}")
+
+# 获取所有图像文件路径
+image_files = [f for f in os.listdir(image_input_dir) if f.endswith('.tif')]
+
+for image_file in image_files:
+    # 构建图像文件的完整路径
+    image_path = os.path.join(image_input_dir, image_file)
+
+    # 根据图像文件名构建对应的CSV文件名
+    base_name = os.path.splitext(image_file)[0]
+    csv_file = f"{base_name}.csv"
+    csv_path = os.path.join(csv_input_dir, csv_file)
+
+    # 检查CSV文件是否存在
+    if not os.path.exists(csv_path):
+        logging.warning(f"Warning: CSV file {csv_file} does not exist.")
+        continue
+
+    # 处理当前图像和CSV文件
+    process_image_and_csv(image_path, csv_path)
+
+logging.info("Batch cropping and CSV processing completed.")
+```
+
 ## 3.UFISH Finetune ####
 ```
 cd UD2_finetune
