@@ -22,8 +22,8 @@ conda activate ufish
 ## 1.数据集及模型概况 ####
 
 ## 2.数据集处理流程 ####
-### 2.1 
-举例说明我是如何把一个TIF，根据文件名，拆分通道的   
+### 2.1 依据图片上的命名，拆分通道    
+举例说明我是如何把一个TIF，根据文件名，拆分通道的     
 ```python
 #### 神经节 ####
 
@@ -81,6 +81,79 @@ for file_name in os.listdir(input_dir):
         print(f"处理文件 {tif_path} 时出错：{e}")
 ```
 结果如下：    
+<img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p1.jpg" width="800" />      
+
+### 2.2 把TIF复制到新目录下    
+举例说明我是如何把上面2.1所拆分的TIF文件，复制到新的目录下（规则是，根据原TIF的路径，组合成一个新文件名）     
+```python
+import os
+import shutil
+
+# 定义源目录和目标目录路径
+source_root_dir = '/home/jjyang/jupyter_file/my_finetune/call点图像整理/神经节'
+target_dir = '/home/jjyang/jupyter_file/my_finetune/call点图片及csv/'
+
+# 创建目标目录（如果不存在）
+os.makedirs(target_dir, exist_ok=True)
+
+def copy_and_rename_files(source_path, target_path):
+    try:
+        print(f"Copying and renaming files from {source_path} to {target_path}:\n")
+        
+        # 提取源目录的关键信息（例如父文件夹名称）
+        parent_folder_name = os.path.basename(os.path.dirname(source_path))  # 获取上一级文件夹名称
+        grandparent_folder_name = os.path.basename(os.path.dirname(os.path.dirname(source_path)))  # 获取上两级文件夹名称
+        
+        # 遍历源目录中的所有文件
+        for file_name in os.listdir(source_path):
+            source_file_path = os.path.join(source_path, file_name)
+            
+            # 筛选 .csv 和 .tif 文件
+            if file_name.lower().endswith(('.csv', '.tif')):
+                # 提取文件名和扩展名
+                base_name, ext = os.path.splitext(file_name)
+                
+                # 构造新文件名
+                new_file_name = f"{grandparent_folder_name}-{parent_folder_name}-{base_name}{ext}"
+                target_file_path = os.path.join(target_path, new_file_name)
+                
+                # 复制并重命名文件
+                shutil.copy(source_file_path, target_file_path)
+                print(f"Copied and renamed: {file_name} -> {new_file_name}")
+    
+    except FileNotFoundError:
+        print(f"The directory {source_path} does not exist.")
+    except PermissionError:
+        print(f"Permission denied accessing {source_path}.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+def process_all_subfolders(root_dir, target_dir):
+    """
+    遍历 root_dir 下的所有子文件夹，并对每个符合条件的子文件夹调用 copy_and_rename_files。
+    """
+    for subfolder in os.listdir(root_dir):
+        subfolder_path = os.path.join(root_dir, subfolder)
+        
+        # 检查是否为目录
+        if os.path.isdir(subfolder_path):
+            rs_fish_path = os.path.join(subfolder_path, 'RS-FISH')
+            
+            # 如果该子文件夹包含 RS-FISH 子目录，则处理它
+            if os.path.exists(rs_fish_path) and os.path.isdir(rs_fish_path):
+                print(f"\nProcessing subfolder: {subfolder}")
+                copy_and_rename_files(rs_fish_path, target_dir)
+
+# 调用函数处理所有子文件夹
+process_all_subfolders(source_root_dir, target_dir)
+
+print("\nAll files have been processed.")
+```
+结果如下：    
+<img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p2.jpg" width="800" />    
+
+
+
 
 
 ## 3.UFISH Finetune ####
