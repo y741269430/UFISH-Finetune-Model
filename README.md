@@ -494,7 +494,8 @@ copy_samples_to_folders(sample_dict, folder_path, split_result, target_base_dir)
 
 print("✅ 完成！")
 ```
-
+结果如下：    
+<img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p6.jpg" width="400" />   
 
 
 ## 3.UFISH Finetune ####
