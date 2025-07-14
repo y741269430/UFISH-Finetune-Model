@@ -83,7 +83,7 @@ for file_name in os.listdir(input_dir):
 结果如下：    
 <img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p1.jpg" width="800" />      
 
-### 2.2 把TIF复制到新目录下    
+### 2.2 把TIF以及CSV复制到新目录下    
 举例说明我是如何把上面2.1所拆分的TIF文件，复制到新的目录下（规则是，根据原TIF的路径，组合成一个新文件名）     
 ```python
 import os
@@ -152,9 +152,60 @@ print("\nAll files have been processed.")
 结果如下：    
 <img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p2.jpg" width="800" />    
 
+### 2.3 把RS-FISH生成的CSV结果，转换成两列    
+举例说明如何把CSV文件取出其中两列，并重命名，更换列顺序    
+```python
+import os
+import pandas as pd
 
+def rename_and_reorder_csv_columns(directory_path):
+    """遍历指定目录下的所有 .csv 文件，并将列名修改为 axis-0 和 axis-1，同时调整列顺序"""
+    try:
+        print(f"Processing CSV files in directory: {directory_path}\n")
+        
+        # 遍历目录中的所有文件
+        for file_name in os.listdir(directory_path):
+            if file_name.endswith('.csv'):
+                file_path = os.path.join(directory_path, file_name)
+                
+                try:
+                    # 读取CSV文件
+                    df = pd.read_csv(file_path)
+                    
+                    # 检查是否有 'x' 和 'y' 列
+                    if 'x' not in df.columns or 'y' not in df.columns:
+                        print(f"Skipping file {file_name} because it does not contain 'x' and 'y' columns.")
+                        continue
+                    
+                    # 修改列名为 axis-1 和 axis-0
+                    df.rename(columns={'y': 'axis-0', 'x': 'axis-1'}, inplace=True)
+                    
+                    # 调整列顺序，使 axis-0 在第一列，axis-1 在第二列
+                    df = df[['axis-0', 'axis-1']]
+                    
+                    # 保存修改后的CSV文件
+                    df.to_csv(file_path, index=False)
+                    print(f"Successfully processed file: {file_name}")
+                
+                except Exception as e:
+                    print(f"Error processing file {file_path}: {e}\n")
+    
+    except FileNotFoundError:
+        print(f"The directory {directory_path} does not exist.")
+    except PermissionError:
+        print(f"Permission denied accessing {directory_path}.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
+# 示例调用
+# 请替换以下参数为你实际的目录路径
+directory_path = '/home/jjyang/jupyter_file/my_finetune/temp'
 
+rename_and_reorder_csv_columns(directory_path)
+```
+结果如下：    
+<img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p3.jpg" width="550" />    
+<img src="https://github.com/y741269430/UFISH-test/blob/main/Imgs/p4.jpg" width="550" />   
 
 ## 3.UFISH Finetune ####
 ```
