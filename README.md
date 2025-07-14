@@ -129,7 +129,7 @@ CUDA_VISIBLE_DEVICES=0 nohup ufish train \
 ```
 grep -E "Train Loss.*Val Loss" train_output.log  > train_val_loss.txt
 ```
-接下来依次执行 3.1.1, 3.2, 3.3.
+接下来依次执行 3.2.1, 3.3.
 
 ---
 ## 4.Spotiflow Finetune ####
