@@ -20,6 +20,8 @@ conda env create -f ufish.yml
 conda activate ufish
 ```
 ## 1.数据集及模型概况 ####
+目前数据集主要分为了3个部分，`UD1`, `UD2（文章提交）`, `UD3（250715最新）`    
+其中，model40.pth是使用了UD2
 
 ## 2.数据集处理流程 ####
 见[2.数据集处理流程](https://github.com/y741269430/UFISH-test/blob/main/%E6%95%B0%E6%8D%AE%E9%9B%86%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B.md)
