@@ -481,7 +481,7 @@ def copy_samples_to_folders(sample_dict, folder_path, split_result, target_base_
 
 # 使用示例
 folder_path = '/home/jjyang/jupyter_file/my_finetune/temp_cut/'
-target_base_dir = '/home/jjyang/jupyter_file/my_finetune/temp_ds/'  # 新建的根目录
+target_base_dir = '/home/jjyang/jupyter_file/FISH_spots/UD2_datasets/'  # 新建的根目录
 
 print("🔍 正在收集样本...")
 sample_dict = get_unique_sample_names(folder_path)
@@ -504,7 +504,10 @@ cd UD2_finetune
 ```
 #### 3.1 直接运行默认模型 ####
 ```
-nohup ufish load_weights v1.0-alldata-ufish_c32.pth - predict_imgs ../FISH_spots/UD2_datasets/text predict --img_glob=\"*.tif\" --intensity_threshold 0.5 &
+nohup ufish load_weights v1.0-alldata-ufish_c32.pth \
+- predict_imgs ../FISH_spots/UD2_datasets/text \
+predict --img_glob=\"*.tif\" \
+--intensity_threshold 0.5 &
 ```
 #### 3.2 Finetune ####  
 ``` 
