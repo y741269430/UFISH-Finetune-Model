@@ -390,10 +390,10 @@ data_sources = [
     ("./spt_finetune/eval_UD2_text.csv", "Spotiflow Finetune"),
     ("./dp_finetune/eval_raw.csv", "deepBlink"),
     ("./dp_finetune/eval_UD2_text.csv", "deepBlink Finetune"),
-    ("./new-ud2/eval_UD2_text.csv", "Big-FISH"),
-    ("./new-ud2/eval_UD2_text.csv", "RS-FISH"),
-    ("./new-ud2/eval_UD2_text.csv", "Starfish"),
-    ("./new-ud2/eval_UD2_text.csv", "TrackMate")
+    ("./new-ud2/eval_UD2_text.csv", "BF_test1.0_f1"),
+    ("./new-ud2/eval_UD2_text.csv", "RS_test1.0_f1"),
+    ("./new-ud2/eval_UD2_text.csv", "ST_test1.0_f1"),
+    ("./new-ud2/eval_UD2_text.csv", "TM_test1.0_f1")
 ]
 
 # 定义目标列名
