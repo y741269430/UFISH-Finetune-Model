@@ -7,6 +7,7 @@
 - 3.UFISH Finetune
 - 4.Spotiflow Finetune
 - 5.deepBlink Finetune
+- 6.Rule-based
 
 
 ---
@@ -460,6 +461,23 @@ for target_metric in target_metrics:
     # 显示图像
     plt.show()
 ```
+
+## 6.Rule-based ##    
+使用cpu计算以下软件的运行时间
+```bash
+# Big-FISH
+CUDA_VISIBLE_DEVICES=-1 taskset -c 67-86 nohup bash -c "time -p python BF_test.py ./test/ /home/jjyang/jupyter_file/test_speed/predict_BF/ > ./test_bf.log" > program1.log 2> time1.log &
+
+# Starfish
+CUDA_VISIBLE_DEVICES=-1 taskset -c 67-86 nohup bash -c "time -p python ST_test.py ./test/ /home/jjyang/jupyter_file/test_speed/predict_ST/ > ./test_st.log" > program1.log 2> time1.log &
+
+# RS-FISH
+CUDA_VISIBLE_DEVICES=-1 taskset -c 67-86 nohup bash -c "time -p ../env/Fiji.app/ImageJ-linux64 --headless --run RS_test.ijm > ./test_rs.log " > program1.log 2> time1.log &
+
+# TrackMate
+CUDA_VISIBLE_DEVICES=-1 taskset -c 67-86 nohup bash -c "time -p ../env/Fiji.app/ImageJ-linux64 --ij2 --mem=24G --headless --run TM_test.py > ./test_tm.log" > program1.log 2> time1.log &
+```
+
 
 
 
