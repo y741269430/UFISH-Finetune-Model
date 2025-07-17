@@ -477,7 +477,7 @@ CUDA_VISIBLE_DEVICES=-1 taskset -c 67-86 nohup bash -c "time -p ../env/Fiji.app/
 # TrackMate
 CUDA_VISIBLE_DEVICES=-1 taskset -c 67-86 nohup bash -c "time -p ../env/Fiji.app/ImageJ-linux64 --ij2 --mem=24G --headless --run TM_test.py > ./test_tm.log" > program1.log 2> time1.log &
 ```
-
+接下来得到的结果需要进一步转化才能得到F1 score（qianzhang做的结果）
 
 
 
