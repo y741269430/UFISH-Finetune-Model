@@ -12,7 +12,7 @@
 
 ---
 ## 0.加载环境 ####
-```
+```bash
 # 输出环境
 # conda env export > ufish.yml 
 # 安装环境
@@ -29,18 +29,18 @@ conda activate ufish
 见[2.数据集处理流程](https://github.com/y741269430/UFISH-test/blob/main/%E6%95%B0%E6%8D%AE%E9%9B%86%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B.md)
 
 ## 3.UFISH Finetune ####
-```
+```bash
 cd UD2_finetune
 ```
 #### 3.1 直接运行默认模型 ####
-```
+```bash
 nohup ufish load_weights v1.0-alldata-ufish_c32.pth \
 - predict_imgs ../FISH_spots/UD2_datasets/text \
 predict --img_glob=\"*.tif\" \
 --intensity_threshold 0.5 &
 ```
 #### 3.2 Finetune ####  
-``` 
+```bash
 CUDA_VISIBLE_DEVICES=0 nohup ufish load-weights ../v1.0-alldata-ufish_c32.pth \
 - train -n 100 \
 ../FISH_spots/UD2_datasets/train 100 \
@@ -49,11 +49,11 @@ CUDA_VISIBLE_DEVICES=0 nohup ufish load-weights ../v1.0-alldata-ufish_c32.pth \
 --batch_size 16 >> train_output.log 2>&1 &
 ```
 输出日志转换成txt用于绘图：
-```
+```bash
 grep -E "Train Loss.*Val Loss" train_output.log  > train_val_loss.txt
 ```
 模型存放于此：
-```
+```bash
 ls model_finetune
 ```
 #### 3.2.1 Check your fine-tuned model ####  
@@ -104,7 +104,7 @@ plt.show()
 ```
 #### 3.3 Prediction & Evaluation ####  
 训练完后，根据上述图表寻找最优的模型 (e.g., `model_80.pth`，即`finetune-250606-model_80.pth`) 
-```
+```bash
 # run prediction 
 nohup ufish load_weights ./model_finetune/model_80.pth \
 - predict_imgs ../FISH_spots/UD2_datasets/test \
@@ -125,7 +125,7 @@ print("Mean f1(cutoff=3.0):", eval_df['f1(cutoff=3)'].mean())
 ```
 #### 3.4 Train a new model ####
 使用以下代码执行重头训练（获得一个新的模型）
-```
+```bash
 CUDA_VISIBLE_DEVICES=0 nohup ufish train \
 - train -n 100 \
 ../FISH_spots/UD2_datasets/train 100 \
@@ -134,7 +134,7 @@ CUDA_VISIBLE_DEVICES=0 nohup ufish train \
 --batch_size 16 >> train_output.log 2>&1 &
 ```
 运行完毕后，执行以下命令获取日志
-```
+```bash
 grep -E "Train Loss.*Val Loss" train_output.log  > train_val_loss.txt
 ```
 接下来依次执行 3.2.1, 3.3.
@@ -143,7 +143,7 @@ grep -E "Train Loss.*Val Loss" train_output.log  > train_val_loss.txt
 UFISH里面还有det_net以及spot_learn，同理也可以做训练以及预测    
 
 训练
-```
+```bash
 CUDA_VISIBLE_DEVICES=3 nohup ufish init_model --model_type='det_net' - train -n 100 \
 ../FISH_spots/UD2_datasets/train \
 ../FISH_spots/UD2_datasets/val \
@@ -158,7 +158,7 @@ CUDA_VISIBLE_DEVICES=2 nohup ufish init_model --model_type='spot_learn' - train 
 ```
 
 预测
-```
+```bash
 nohup ufish init_model --model_type='det_net' load_weights new_model/best_model.pth \
 - predict_imgs ../FISH_spots/UD2_datasets/test \
 ./predict_det --img_glob=\"*.tif\" \
@@ -175,16 +175,16 @@ nohup ufish init_model --model_type='spot_learn' load_weights new_model/best_mod
 
 ---
 ## 4.Spotiflow Finetune ####
-```
+```bash
 cd spt_finetune
 ```
 #### 4.1 直接运行默认模型 ####
-```
+```bash
 spotiflow-predict ../FISH_spots/UD2_datasets/test -pm general -o predict -t 0.5 -d gpu &
 ```
 #### 4.2 Finetune ####  
 第一次执行的时候，会下载模型及数据集，存放于`~/.spotiflow/models/general`
-```
+```bash
 CUDA_VISIBLE_DEVICES=0 nohup spotiflow-train ../FISH_spots/UD2_datasets/ \
 --finetune-from ./general \
 -o model_finetune \
@@ -271,51 +271,51 @@ plt.xticks(range(0, 101, 5))
 plt.show()
 ```
 #### 4.3 Prediction & Evaluation ####  
-```
+```bash
 # run prediction 
 CUDA_VISIBLE_DEVICES=0 nohup spotiflow-predict ../FISH_spots/UD2_datasets/test \
 -md ./model_finetune -o ./predict_test -t 0.5 -d cuda &
 ```
 使用脚本对输出csv进行格式转换
-```
+```bash
 # run evaluation 1 (Processing... Please wait.)
 bash spt2pred.sh ./predict_test
 ```
-```
+```bash
 # run evaluation 2
 nohup ufish evaluate_imgs ./predict_test ../FISH_spots/UD2_datasets/test ./eval_UD2_text.csv &
 ```
 
 ---
 ## 5.deepBlink Finetune ####
-```
+```bash
 cd dpl_finetune
 ```
 #### 5.1 直接运行默认模型 ####
 使用以下代码下载模型，或网站下载[here](https://figshare.com/articles/software/Download/13220717)
-```
+```bash
 deepblink download
 ```
-```
+```bash
 deepblink predict --model dpbl_model/smfish.h5 -i ../FISH_spots/UD2_datasets/test -o ./predict &
 ```
 #### 5.2 Predict ####  
-```
+```bash
 nohup deepblink predict --model ./230903_210048_deepBlink_is_sweet.h5 -i ../FISH_spots/UD2_datasets/test/ -o ./predict_test/ &
 ```
 这里需要手动删除一些只有表头的文件，不然执行以下代码会报错
-```
+```bash
 # 检查只有表头的文件
 wc -l predict/*.csv | awk '$1 < 3 && $1 != "total" {print $2}'
 # 然后把这些只有表头的文件删除
 wc -l predict/*.csv | awk '$1 < 3 && $1 != "total" {system("rm -f "$2)}'
 ```
 使用脚本对输出csv进行格式转换
-```
+```bash
 # 对输出的结果进行转换
 python dpl2pred.py
 ```
-```
+```bash
 # run evaluation
 nohup ufish evaluate_imgs ./predict_test ../FISH_spots/UD2_datasets/test ./eval_raw.csv &
 ```
@@ -382,30 +382,30 @@ print("✅ 数据集已成功加载并保存！")
 ```
 #### 5.3.2 Train ####
 执行以下代码，会生成一个`config.yaml`，然后进去填写路径，betchsize等信息
-```
+```bash
 deepblink config
 ```
 运行
-```
+```bash
 nohup deepblink train --config config.yaml -g 0 &
 ```
 #### 5.4 Prediction & Evaluation ####  
-```
+```bash
 nohup deepblink predict --model ./fine_md/250610_224839_deepBlink_is_sweet.h5 -i ../FISH_spots/UD2_datasets/test/ -o ./predict_finetune/ &
 ```
 这里需要手动删除一些只有表头的文件，不然执行以下代码会报错
-```
+```bash
 # 检查只有表头的文件
 wc -l predict_finetune/*.csv | awk '$1 < 3 && $1 != "total" {print $2}'
 # 然后把这些只有表头的文件删除
 wc -l predict_finetune/*.csv | awk '$1 < 3 && $1 != "total" {system("rm -f "$2)}'
 ```
 使用脚本对输出csv进行格式转换
-```
+```bash
 # 对输出的结果进行转换
 python dpl2pred.py
 ```
-```
+```bash
 # run evaluation
 nohup ufish evaluate_imgs ./predict_finetune ../FISH_spots/UD2_datasets/test ./eval_UD2_text.csv &
 ```
