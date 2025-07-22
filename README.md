@@ -139,6 +139,40 @@ grep -E "Train Loss.*Val Loss" train_output.log  > train_val_loss.txt
 ```
 接下来依次执行 3.2.1, 3.3.
 
+#### 3.5 Train a new model（det_net or spot_learn） ####
+UFISH里面还有det_net以及spot_learn，同理也可以做训练以及预测    
+
+训练
+```
+CUDA_VISIBLE_DEVICES=3 nohup ufish init_model --model_type='det_net' - train -n 100 \
+../FISH_spots/UD2_datasets/train \
+../FISH_spots/UD2_datasets/val \
+--model_save_dir ./new_model/ \
+--batch_size 16 >> train_output.log 2>&1 &
+
+CUDA_VISIBLE_DEVICES=2 nohup ufish init_model --model_type='spot_learn' - train -n 100 \
+../FISH_spots/UD2_datasets/train \
+../FISH_spots/UD2_datasets/val \
+--model_save_dir ./new_model/ \
+--batch_size 16 >> train_output.log 2>&1 &
+```
+
+预测
+```
+nohup ufish init_model --model_type='det_net' load_weights new_model/best_model.pth \
+- predict_imgs ../FISH_spots/UD2_datasets/test \
+./predict_det --img_glob=\"*.tif\" \
+--intensity_threshold 0.1 \
+--axes='yx' &
+
+nohup ufish init_model --model_type='spot_learn' load_weights new_model/best_model.pth \
+- predict_imgs ../FISH_spots/UD2_datasets/test \
+./predict_spotl --img_glob=\"*.tif\" \
+--intensity_threshold 0.1 \
+--axes='yx' &
+
+```
+
 ---
 ## 4.Spotiflow Finetune ####
 ```
