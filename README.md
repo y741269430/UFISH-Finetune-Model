@@ -23,7 +23,7 @@ conda activate ufish
 ## 1.数据集及模型概况 ####
 目前数据集主要分为了3个部分，`UD1`, `UD2（文章提交）`, `UD3（250715最新）`    
 其中，`finetune-250527-model_40.pth`是使用了UD1和UD2的数据，并且UD2的训练集和测试集是来自不同的图像。    
-而`finetune-250606-model_80`是仅使用UD2的数据，并且UD2的训练集和测试集是来自不同的图像，该模型的结果后来被用在文章当中用作比较F1 score。    
+而`finetune-250606-model_80.pth`是仅使用UD2的数据，并且UD2的训练集和测试集是来自不同的图像，该模型的结果后来被用在文章当中用作比较F1 score。    
 
 ## 2.数据集处理流程 ####
 见[2.数据集处理流程](https://github.com/y741269430/UFISH-test/blob/main/%E6%95%B0%E6%8D%AE%E9%9B%86%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B.md)
@@ -103,7 +103,7 @@ plt.xticks(range(0, 101, 5))
 plt.show()
 ```
 #### 3.3 Prediction & Evaluation ####  
-训练完后，根据上述图表寻找最优的模型 (e.g., `model_80.pth`) 
+训练完后，根据上述图表寻找最优的模型 (e.g., `model_80.pth`，即`finetune-250606-model_80.pth`) 
 ```
 # run prediction 
 nohup ufish load_weights ./model_finetune/model_80.pth \
