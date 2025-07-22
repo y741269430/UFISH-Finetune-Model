@@ -1,4 +1,4 @@
-# UFISH-test
+# UFISH Finetune Model
 
 ## 目录 ####
 - 0.加载环境
